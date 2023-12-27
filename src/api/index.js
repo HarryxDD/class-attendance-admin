@@ -37,7 +37,6 @@ export const updateEmployee = (id, updatedUser) =>
 export const deleteEmployee = (id) => API.delete(`/staff/detail/${id}/delete`);
 
 // attendance
-
 export const CheckIn = (employee_code) =>
   API.post(`/staff/attendance/${employee_code}/create`);
 
@@ -48,3 +47,6 @@ export const fetchAttandanceChart = (month, year) =>
     )}year=${year}`
   );
 
+// students
+export const fetchStudents = () => API.get(`/`);
+export const addNewStudent = (formdata) => API.post(`/`, formdata);
