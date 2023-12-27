@@ -47,8 +47,14 @@ export const fetchAttandanceChart = (month, year) =>
     )}year=${year}`
   );
 
-export const fetchAttendance = (params) =>
-  API.post(`/check-attendance`, params);
+export const fetchAttendance = (postParams) =>
+  {
+    return API.post(`/check-attendance`, postParams, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  };
 
 // students
 export const fetchStudents = () =>

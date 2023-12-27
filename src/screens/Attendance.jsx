@@ -2,23 +2,35 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { getDatabase, ref, onValue, off, set } from "firebase/database";
-import {
-  AiOutlineCheck,
-  AiOutlineOrderedList,
-  AiOutlinePicLeft,
-  AiOutlineSearch,
-} from "react-icons/ai";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import app from "../config/firebaseConfig";
 import { textVariant, zoomIn } from "../utils/motion";
 import { CheckIn } from "../actions/employeeActions";
-import { HOST_API } from "../constants/Api";
 import { Loader } from "../components";
 import { useNavigate } from "react-router-dom";
-import { ATTENDANCE_DUMMY } from "../constants/attendance";
+import { fetchAttendance } from "../actions/studentAction";
+import moment from "moment";
+import { formatDate } from "../utils/date-time";
 
 const database = getDatabase(app);
 const databaseRef = ref(database, "messages");
+
+const CustomInput = ({ value, onClick, startDate, endDate }) => {
+  const formatedStartDate = formatDate(moment(startDate).toISOString())
+  const formatedEndDate = formatDate(moment(endDate).toISOString())
+  return (
+    <div className="w-full">
+      <input
+        className="my-input w-full"
+        type="text"
+        onClick={onClick}
+        value={`${formatedStartDate || 'Select date'} - ${formatedEndDate || 'Select date'}`}
+      />
+    </div>
+  );
+};
 
 const Attendance = () => {
   const navigate = useNavigate();
@@ -27,63 +39,55 @@ const Attendance = () => {
 
   const [date, setDate] = useState(today);
   const [searchTerm, setSearchTerm] = useState("");
-  const employeeReducer = useSelector((state) => state.employeeReducer);
-  const authData = useSelector((state) => state.authReducer.authData);
-  const { attendance, employeeInfo, loading } = employeeReducer;
-
-  // const [attendanceData, setAttendanceData] = useState(attendance);
-  const [attendanceData, setAttendanceData] = useState(ATTENDANCE_DUMMY);
+  const studentReducer = useSelector((state) => state.studentReducer);
+  const { attendance, loading } = studentReducer;
+  const [attendanceData, setAttendanceData] = useState(attendance);
+  const [dateRange, setDateRange] = useState({startDate: null, endDate: null});
+  const {startDate, endDate} = dateRange;
 
   useEffect(() => {
-    const year = date.split("-")[0];
-    const month = date.split("-")[1];
-    const day = date.split("-")[2];
-    const dateParams = { day, month, year };
-    // dispatch(fetchAttandance(dateParams));
-    // Event listener for value changes
-    const onDataChange = async (snapshot) => {
-      ``;
-      // Get the message value from the snapshot
-      const newMessage = snapshot.val();
-
-      // Check if the message is different from the known value
-      if (newMessage !== "Unknown") {
-        console.log(newMessage);
-        dispatch(CheckIn(newMessage));
-        await set(databaseRef, "Unknown");
-      }
+    const postParams = {
+      personIds: ["20020001", "20020005"],
+      startTime: `${formatDate(moment(startDate).toISOString())} 00:00:00`,
+      endTime: `${formatDate(moment(endDate).toISOString())} 23:59:59`,
     };
 
-    // Attach the listener
-    onValue(databaseRef, onDataChange);
+    if ((startDate && endDate) || (!startDate && !endDate))
+    dispatch(fetchAttendance(postParams));
+  }, [dispatch, startDate, endDate]);
 
-    // Clean up the listener on component unmount
-    return () => {
-      off(databaseRef, "value", onDataChange);
-    };
-  }, [date, dispatch]);
+  useEffect(() => {
+    setAttendanceData(attendance);
+  }, [attendance]);
 
   // useEffect(() => {
-  //   if (searchTerm !== "") {
-  //     const filterData = attendance.filter((att) => {
-  //       return (
-  //         att.first_name.includes(searchTerm) ||
-  //         att.last_name.includes(searchTerm)
-  //       );
-  //     });
-  //     setAttendanceData(filterData);
-  //   } else {
-  //     setAttendanceData(attendance);
-  //   }
-  //   if (attendanceData) {
-  //     console.log(attendanceData);
-  //     const EM = attendanceData.find((att) => att.id == authData.id);
-  //     console.log(EM);
-  //     if (EM && EM.id !== 1) {
-  //       navigate(`/employees/${EM.employee_code}`);
+  //   const year = date.split("-")[0];
+  //   const month = date.split("-")[1];
+  //   const day = date.split("-")[2];
+  //   const dateParams = { day, month, year };
+  //   // dispatch(fetchAttandance(dateParams));
+  //   // Event listener for value changes
+  //   const onDataChange = async (snapshot) => {
+  //     ``;
+  //     // Get the message value from the snapshot
+  //     const newMessage = snapshot.val();
+
+  //     // Check if the message is different from the known value
+  //     if (newMessage !== "Unknown") {
+  //       console.log(newMessage);
+  //       dispatch(CheckIn(newMessage));
+  //       await set(databaseRef, "Unknown");
   //     }
-  //   }
-  // }, [searchTerm, attendance]);
+  //   };
+
+  //   // Attach the listener
+  //   onValue(databaseRef, onDataChange);
+
+  //   // Clean up the listener on component unmount
+  //   return () => {
+  //     off(databaseRef, "value", onDataChange);
+  //   };
+  // }, [date, dispatch]);
 
   const handleChangeDate = (e) => {
     setDate(e.target.value);
@@ -94,6 +98,11 @@ const Attendance = () => {
     if (employeeInfo.time_in) return "bg-green-300";
     return "bg-red-300";
   };
+
+  const onDateChange = dates => {
+    const [start, end] = dates;
+    setDateRange({startDate: start, endDate: end});
+}
 
   if (loading) {
     return <Loader />;
@@ -120,9 +129,10 @@ const Attendance = () => {
                 duration: 1,
                 bounce: 0.1,
               }}
-              className="flex flex-row mb-1 sm:mb-0 sm:flex-row border border-slate-500 rounded-md overflow-hidden"
+              className="flex flex-row mb-1 w-full sm:mb-0 sm:flex-row border border-slate-500 rounded-md overflow-hidden"
             >
-              <div className="flex items-center justify-center border ">
+              {/* // TODO: Search Feature */}
+              {/* <div className="flex items-center justify-center border ">
                 <input
                   placeholder="Search"
                   value={searchTerm}
@@ -132,14 +142,26 @@ const Attendance = () => {
                 <span className="text-2xl p-2">
                   <AiOutlineSearch />
                 </span>
-              </div>
-              <div className="p-2 block items-center bg-white">
-                <input
+              </div> */}
+              <div className="p-2 block items-center bg-white w-full">
+                {/* <input
                   className="outline-none text-base font-light from-neutral-400 "
                   placeholder="halo"
                   type="date"
                   value={date}
                   onChange={(e) => handleChangeDate(e)}
+                /> */}
+                <DatePicker
+                  selected={startDate}
+                  selectsRange
+                  startDate={startDate}
+                  endDate={endDate}
+                  placeholderText={"Select date"}
+                  dateFormat={"MMMM Do, h:mm"}
+                  onChange={onDateChange}
+                  // locale={selectLocale(locale)}
+                  wrapperClassName={"w-full"}
+                  customInput={<CustomInput startDate={startDate} endDate={endDate} />}
                 />
               </div>
             </motion.div>
@@ -158,6 +180,9 @@ const Attendance = () => {
                       </th>
                       <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Checked In At
+                      </th>
+                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Checked Full
                       </th>
                     </tr>
                   </thead>
@@ -184,7 +209,16 @@ const Attendance = () => {
                         </td>
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">
-                            {student.timestamp}
+                            {
+                              student.checkin_times[
+                                student.checkin_times.length - 1
+                              ]
+                            }
+                          </p>
+                        </td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap">
+                            {student.isCheckedFull && "Yes"}
                           </p>
                         </td>
                       </motion.tr>

@@ -72,13 +72,13 @@ export const deleteStudent = (params) => async (dispatch) => {
   }
 };
 
-export const fetchAttendance = (date) => async (dispatch) => {
+export const fetchAttendance = (postParams) => async (dispatch) => {
   try {
     dispatch({
       type: actionType.START_LOADING,
     });
 
-    const { data: attData } = await api.fetchAttendance(date);
+    const {data: attData} = await api.fetchAttendance(postParams);
 
     dispatch({
       type: actionType.ATTENDANCE_LIST_SUCCESS,

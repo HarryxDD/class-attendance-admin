@@ -23,6 +23,7 @@ const studentReducer = (state = initialState, action) => {
         students: action.payload.data,
       };
     case actionType.ATTENDANCE_LIST_SUCCESS:
+      console.log('action.payload', action.payload)
       return {
         ...state,
         loading: false,
