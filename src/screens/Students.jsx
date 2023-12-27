@@ -6,30 +6,42 @@ import app from "../config/firebaseConfig";
 import { textVariant, zoomIn } from "../utils/motion";
 import { Loader } from "../components";
 import { useNavigate } from "react-router-dom";
-import { STUDENTS_DUMMY } from "../constants/students";
+import defaultAvatar from "../assets/images/default_avatar.png";
 import { AddStudentModal } from ".";
-import { fetchStudents } from "../actions/studentAction";
+import { deleteStudent, fetchStudents } from "../actions/studentAction";
 
 const database = getDatabase(app);
 const databaseRef = ref(database, "messages");
 
 const Students = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const today = new Date().toISOString().substr(0, 10);
 
   const [date, setDate] = useState(today);
-  const employeeReducer = useSelector((state) => state.employeeReducer);
-  const { attendance, employeeInfo, loading } = employeeReducer;
-  const [studentData, setStudentData] = useState(STUDENTS_DUMMY);
+  const studentReducer = useSelector((state) => state.studentReducer);
+  const { students, loading } = studentReducer;
+  const [studentData, setStudentData] = useState(students);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchStudents());
   }, [dispatch]);
 
-  const handleConfirm = () => {
-    console.log("Add new Student");
+  useEffect(() => {
+    setStudentData(students);
+  }, [students]);
+
+  const handleConfirm = async () => {
+    await dispatch(fetchStudents());
+    setIsModalOpen(false);
+  };
+
+  const handleDeleteStudent = async (event, student) => {
+    await dispatch(
+      deleteStudent({ name: student.name, personId: student.personId })
+    );
+
+    dispatch(fetchStudents());
   };
 
   if (loading) {
@@ -62,28 +74,37 @@ const Students = () => {
               <div className="container rounded-md py-5 px-1">
                 <div className="grid grid-cols-4 gap-4">
                   {studentData.map((student, i) => (
-                    <motion.a
+                    <motion.div
                       key={i}
-                      href={`/?studentId=${student.id}`}
+                      // href={`/?studentId=${student.personId}`}
                       variants={zoomIn(i * 0.05, 0.5)}
                       initial="hidden"
                       whileInView="show"
                       whileHover="whileHover"
-                      className={`flex flex-col items-center bg-white shadow-lg rounded-lg overflow-hidden`}
+                      className={`flex flex-col items-center bg-white shadow-lg rounded-lg overflow-hidden min-h-350 py-5`}
                     >
                       <img
-                        src={student.img}
+                        placeholder={defaultAvatar}
+                        // src={defaultAvatar}
+                        src={student.url}
                         className="w-32 h-32 object-cover rounded-full mt-5"
+                        alt=""
                       />
                       <div className="p-4">
                         <h2 className="text-lg font-semibold text-slate-800 text-center ">
                           {student.name}
                         </h2>
                         <p className="text-slate-800 text-center my-2">
-                          {student.id}
+                          {student.personId}
                         </p>
                       </div>
-                    </motion.a>
+                      <button
+                        className="transition w-[80%] m-auto ease-in-out self-end bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded"
+                        onClick={(event) => handleDeleteStudent(event, student)}
+                      >
+                        Delete
+                      </button>
+                    </motion.div>
                   ))}
                 </div>
               </div>

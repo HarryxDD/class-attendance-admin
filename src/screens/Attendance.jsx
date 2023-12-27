@@ -11,7 +11,7 @@ import {
 
 import app from "../config/firebaseConfig";
 import { textVariant, zoomIn } from "../utils/motion";
-import { CheckIn, fetchAttandance } from "../actions/employeeActions";
+import { CheckIn } from "../actions/employeeActions";
 import { HOST_API } from "../constants/Api";
 import { Loader } from "../components";
 import { useNavigate } from "react-router-dom";
@@ -34,14 +34,12 @@ const Attendance = () => {
   // const [attendanceData, setAttendanceData] = useState(attendance);
   const [attendanceData, setAttendanceData] = useState(ATTENDANCE_DUMMY);
 
-console.log('attendanceData',attendanceData)
-
   useEffect(() => {
     const year = date.split("-")[0];
     const month = date.split("-")[1];
     const day = date.split("-")[2];
     const dateParams = { day, month, year };
-    dispatch(fetchAttandance(dateParams));
+    // dispatch(fetchAttandance(dateParams));
     // Event listener for value changes
     const onDataChange = async (snapshot) => {
       ``;
@@ -149,51 +147,51 @@ console.log('attendanceData',attendanceData)
           {attendanceData?.length > 0 ? (
             <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
               <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
-                  <table className="min-w-full leading-normal">
-                    <thead>
-                      <tr>
-                        <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                          Name
-                        </th>
-                        <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                          Student Id
-                        </th>
-                        <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                          Checked In At
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendanceData.map((student, i) => (
-                        <motion.tr
-                          variants={zoomIn(i * 0.03, 0.5)}
-                          initial="hidden"
-                          whileInView="show"
-                          whileHover="whileHover"
-                          key={i}
-                        >
-                          <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                              <div className="ml-3">
-                                <p className="text-gray-900 whitespace-no-wrap">
-                                  {student.name}
-                                </p>
-                              </div>
-                          </td>
-                          <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <table className="min-w-full leading-normal">
+                  <thead>
+                    <tr>
+                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Student Id
+                      </th>
+                      <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Checked In At
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendanceData.map((student, i) => (
+                      <motion.tr
+                        variants={zoomIn(i * 0.03, 0.5)}
+                        initial="hidden"
+                        whileInView="show"
+                        whileHover="whileHover"
+                        key={i}
+                      >
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                          <div className="ml-3">
                             <p className="text-gray-900 whitespace-no-wrap">
-                              {student.personId}
+                              {student.name}
                             </p>
-                          </td>
-                          <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap">
-                              {student.timestamp}
-                            </p>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap">
+                            {student.personId}
+                          </p>
+                        </td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                          <p className="text-gray-900 whitespace-no-wrap">
+                            {student.timestamp}
+                          </p>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : (
             <h3>Chưa có dữ liệu</h3>

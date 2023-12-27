@@ -47,6 +47,19 @@ export const fetchAttandanceChart = (month, year) =>
     )}year=${year}`
   );
 
+export const fetchAttendance = (params) =>
+  API.post(`/check-attendance`, params);
+
 // students
-export const fetchStudents = () => API.get(`/`);
-export const addNewStudent = (formdata) => API.post(`/`, formdata);
+export const fetchStudents = () =>
+  API.get(`/get_users`, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+    },
+  });
+export const addNewStudent = (formdata) => API.post(`/register`, formdata);
+export const deleteStudent = (params) =>
+  API.delete(`/delete_user`, {
+    data: params,
+  });

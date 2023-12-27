@@ -50,3 +50,48 @@ export const addStudent = (formData) => async (dispatch) => {
     });
   }
 };
+
+export const deleteStudent = (params) => async (dispatch) => {
+  try {
+    dispatch({
+      type: actionType.START_LOADING,
+    });
+    await api.deleteStudent(params);
+
+    dispatch({ type: actionType.STUDENT_DELETE_SUCCESS, payload: params });
+  } catch (error) {
+    console.log(error);
+    const message =
+      error.response && error.response.data
+        ? error.response.data
+        : error.message;
+    dispatch({
+      type: actionType.STUDENT_DELETE_FAIL,
+      payload: message,
+    });
+  }
+};
+
+export const fetchAttendance = (date) => async (dispatch) => {
+  try {
+    dispatch({
+      type: actionType.START_LOADING,
+    });
+
+    const { data: attData } = await api.fetchAttendance(date);
+
+    dispatch({
+      type: actionType.ATTENDANCE_LIST_SUCCESS,
+      payload: attData,
+    });
+  } catch (error) {
+    const message =
+      error.response && error.response.data.message
+        ? error.response.data.message
+        : error.message;
+    dispatch({
+      type: actionType.ATTENDANCE_LIST_FAIL,
+      payload: message,
+    });
+  }
+};

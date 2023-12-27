@@ -2,9 +2,11 @@ import * as actionType from "../constants/employeeConstants";
 
 const initialState = {
   students: [],
+  attendance: [],
+  loading: false,
 };
 
-const employeeReducer = (state = initialState, action) => {
+const studentReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionType.START_LOADING:
       return { ...state, loading: true };
@@ -18,28 +20,25 @@ const employeeReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        employees: action.payload.data,
+        students: action.payload.data,
       };
-    case actionType.ATTANDANCE_LIST_SUCCESS:
+    case actionType.ATTENDANCE_LIST_SUCCESS:
       return {
         ...state,
         loading: false,
         attendance: action.payload,
       };
-    case actionType.CHECK_IN_SUCCESS:
+    case actionType.STUDENT_DELETE_SUCCESS:
       return {
         ...state,
         loading: false,
-        attendance: state.attendance.map((employee) =>
-          employee.employee_code !== action.payload.employee_code
-            ? employee
-            : action.payload
+        students: state.employees.filter(
+          (student) => student.personId !== action.payload
         ),
       };
-    case actionType.ATTANDANCE_LIST_FAIL:
-    case actionType.CHECK_IN_FAIL:
-    case actionType.EMPLOYEE_ADD_FAIL:
+    case actionType.ATTENDANCE_LIST_FAIL:
     case actionType.STUDENT_ADD_FAIL:
+    case actionType.STUDENT_DELETE_FAIL:
     case actionType.STUDENT_LIST_FAIL:
       return { ...state, loading: false, error: action.payload };
     default:
@@ -47,4 +46,4 @@ const employeeReducer = (state = initialState, action) => {
   }
 };
 
-export default employeeReducer;
+export default studentReducer;
